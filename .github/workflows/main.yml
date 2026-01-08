@@ -1,0 +1,67 @@
+name: Node.js CI Workflow
+
+# ----------------------------------------------------
+# Workflow Triggers
+# ----------------------------------------------------
+# Runs on push and pull request to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# ----------------------------------------------------
+# Environment Variables (Workflow Level)
+# ----------------------------------------------------
+env:
+  NODE_ENV: production
+
+# ----------------------------------------------------
+# Jobs Definition
+# ----------------------------------------------------
+jobs:
+  build:
+    name: Build and Test Node.js Application
+    runs-on: ubuntu-latest
+
+    # ------------------------------------------------
+    # Build Matrix (Parallel Execution)
+    # ------------------------------------------------
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    # ------------------------------------------------
+    # Conditional Execution
+    # ------------------------------------------------
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    # ------------------------------------------------
+    # Steps
+    # ------------------------------------------------
+    steps:
+      # Step 1: Checkout repository code
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js version from matrix
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Step 3: Display environment variable
+      - name: Display environment
+        run: echo "Environment is $NODE_ENV"
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 5: Build application
+      - name: Build application
+        run: npm run build
+
+      # Step 6: Run tests
+      - name: Run tests
+        run: npm test
